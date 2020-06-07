@@ -1,5 +1,4 @@
 import socket
-import argparse
 import threading
 
 def handle_receive(client_socket):
