@@ -11,6 +11,17 @@ room_list = []
 room_user = {}
 user_room = {}
 
+def msg_send(client_socket,addr, msg):
+    print(msg)
+    room = user_room[client_socket]
+    for con in room_user[room]:
+        try:
+            con.send(msg.encode('utf-8'))
+        except:
+            print('abnormal connection')
+
+
+
 def msg_func(msg):
     print(msg)
     for con in user_list.values():
@@ -59,8 +70,8 @@ def handle_receive(client_socket, addr, user):
             room_list.append(room_name)
             room_user[room_name] = set()
             room_user[room_name].add(client_socket)
-            user_room[client_socket] = set()
-            user_room[client_socket].add(room_name)
+            user_room[client_socket] = ''
+            user_room[client_socket]= room_name
             msg = 'Room created'
             print(client_socket)
             try:
@@ -69,11 +80,20 @@ def handle_receive(client_socket, addr, user):
                 print('No WAY')
 
 
-        #elif "/join" in string:
+        elif "/join" in string:
+            string_list = list(string.split())
+            room_name = string_list[1]
+            room_user[room_name].add(client_socket)
+            user_room[client_socket]= room_name
+            msg = "%s has entered"
+            try:
+                msg_send(client_socket,addr,msg.encode('utf-8'))
+            except:
+                print('NO WAY')
                 
         else:
             string = "%s : %s"%(user, string)
-            msg_func(string)
+            msg_send(client_socket, addr, string)
     client_socket.close()
 
 
