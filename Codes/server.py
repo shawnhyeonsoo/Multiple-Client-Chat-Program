@@ -15,10 +15,13 @@ def msg_send(client_socket,addr, msg):
     print(msg)
     room = user_room[client_socket]
     for con in room_user[room]:
-        try:
-            con.send(msg.encode('utf-8'))
-        except:
-            print('abnormal connection')
+        if con == client_socket:
+            pass
+        else:
+            try:
+                con.send(msg.encode('utf-8'))
+            except:
+                print('abnormal connection')
 
 
 
@@ -31,9 +34,9 @@ def msg_func(msg):
             print("연결이 비 정상적으로 종료된 소켓 발견")
 
 
-def handle_receive(client_socket, addr, user):
-    msg = "---- %s has entered. ----"%user
-    msg_func(msg)
+def handle_receive(client_socket, addr):
+    #msg = "---- %s has entered. ----"%user
+    #msg_func(msg)
     while 1:
         data = client_socket.recv(1024)
         string = data.decode('utf-8')
@@ -67,11 +70,16 @@ def handle_receive(client_socket, addr, user):
         elif "/create" in string:
             string_list = list(string.split())
             room_name = string_list[1]
+            if len(string_list) >= 3:
+                user= string_list[2]
+            else:
+                user = "Unknown"
             room_list.append(room_name)
             room_user[room_name] = set()
             room_user[room_name].add(client_socket)
             user_room[client_socket] = ''
             user_room[client_socket]= room_name
+            user_list[user] = client_socket
             msg = 'Room created'
             print(client_socket)
             try:
@@ -83,11 +91,17 @@ def handle_receive(client_socket, addr, user):
         elif "/join" in string:
             string_list = list(string.split())
             room_name = string_list[1]
+            if len(string_list) >= 3:
+                user= string_list[2]
+            else:
+                user= "Unknown"
+
             room_user[room_name].add(client_socket)
             user_room[client_socket]= room_name
-            msg = "%s has entered"
+            user_list[user] = client_socket
+            msg = "----%s has entered----"%user
             try:
-                msg_send(client_socket,addr,msg.encode('utf-8'))
+                msg_send(client_socket,addr,msg)
             except:
                 print('NO WAY')
                 
@@ -98,7 +112,7 @@ def handle_receive(client_socket, addr, user):
 
 
 
-def handle_notice(client_socket, addr, user):
+def handle_notice(client_socket, addr):
     pass
 
 
@@ -125,15 +139,15 @@ def accept_func():
             server_socket.close()
             print("Keyboard interrupt")
             break
-        user = client_socket.recv(1024).decode('utf-8')
-        user_list[user] = client_socket
+        #user = client_socket.recv(1024).decode('utf-8')
+        #user_list[user] = client_socket
 
         #accept()함수로 입력만 받아주고 이후 알고리즘은 핸들러에게 맡긴다.
-        notice_thread = threading.Thread(target=handle_notice, args=(client_socket, addr, user))
+        notice_thread = threading.Thread(target=handle_notice, args=(client_socket, addr,))
         notice_thread.daemon = True
         notice_thread.start()
 
-        receive_thread = threading.Thread(target=handle_receive, args=(client_socket, addr,user))
+        receive_thread = threading.Thread(target=handle_receive, args=(client_socket, addr,))
         receive_thread.daemon = True
         receive_thread.start()
 
@@ -142,12 +156,17 @@ if __name__ == '__main__':
     #parser와 관련된 메서드 정리된 블로그 : https://docs.python.org/ko/3/library/argparse.html
     #description - 인자 도움말 전에 표시할 텍스트 (기본값: none)
     #help - 인자가 하는 일에 대한 간단한 설명.
-    parser = argparse.ArgumentParser(description="\nJoo's server\n-p port\n")
-    parser.add_argument('-p', help="port")
+    #parser = argparse.ArgumentParser(description="\nJoo's server\n-p port\n")
+    #parser.add_argument('-p', help="port")
 
-    args = parser.parse_args()
+    #args = parser.parse_args()
     try:
         port = int(args.p)
     except:
         pass
+    #input_msg = input('>>>')
+    #print('input_msg')
     accept_func()
+    data = input()
+    print(data)
+    print(data)
