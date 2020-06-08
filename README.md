@@ -61,7 +61,7 @@ There are 2 states for clients, and 1 states for server
 </br>
 </br>
 To execute: </br>
-'python3 server.py' and 'python3 client.py' (server file should be executed first). 
+run 'python3 server.py' and 'python3 client.py' on separate consoles.(server file should be executed first in order to function properly). 
 
 </br> 
 This is a programming project given in Computer Networks class. New to socket programming, this was a great opportunity to get
